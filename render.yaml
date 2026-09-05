@@ -1,4 +1,4 @@
-# Render blueprint: one web service that serves both the API and the storefront.
+# Render blueprint: API only. The React client is deployed separately on Vercel.
 # Import at dashboard.render.com > New > Blueprint, then fill the sync:false values.
 services:
   - type: web
@@ -6,8 +6,8 @@ services:
     runtime: node
     plan: free
     region: frankfurt
-    # Repo root, not server/ — the build needs both halves.
-    buildCommand: npm run build
+    rootDir: server
+    buildCommand: npm ci
     startCommand: npm start
     healthCheckPath: /api/health
     envVars:
@@ -28,6 +28,11 @@ services:
       - key: RATE_LIMIT_MAX
         value: "300"
       # --- set these in the Render dashboard ---
+      # CLIENT_URL must be the Vercel origin, or CORS will reject the frontend.
+      - key: CLIENT_URL
+        sync: false
+      - key: SERVER_URL
+        sync: false
       - key: MONGODB_URI
         sync: false
       - key: JWT_SECRET
@@ -35,8 +40,6 @@ services:
       - key: JWT_REFRESH_SECRET
         sync: false
       - key: COOKIE_SECRET
-        sync: false
-      - key: SERVER_URL
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
