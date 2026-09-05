@@ -1,0 +1,265 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --page: 251 247 241;
+    --ink: 51 36 26;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-cream-100 font-sans text-cocoa-700 antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
+    /*
+     * Guards against stray horizontal scroll on small screens (snap carousels
+     * and decorative offsets). `clip` rather than `hidden` on purpose: `hidden`
+     * would make the body a scroll container and break the sticky navbar.
+     */
+    overflow-x: clip;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display text-cocoa-800;
+    font-variation-settings: 'SOFT' 0, 'WONK' 0;
+  }
+
+  /* Focus ring only for keyboard users, never for mouse clicks. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-caramel-500 ring-offset-2 ring-offset-cream-100;
+  }
+
+  ::selection {
+    @apply bg-caramel-200 text-cocoa-800;
+  }
+
+  /* Scrollbar tuned to the palette rather than the OS default. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-cream-200;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-cocoa-200;
+    border: 2px solid rgb(248 240 228);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-cocoa-300;
+  }
+
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
+@layer components {
+  /* ── Layout ─────────────────────────────────────────────────────────── */
+  .container-page {
+    @apply mx-auto w-full max-w-[1320px] px-5 sm:px-6 lg:px-10;
+  }
+
+  .section {
+    @apply py-16 md:py-24;
+  }
+
+  .section-tight {
+    @apply py-12 md:py-16;
+  }
+
+  /* ── Typography helpers ─────────────────────────────────────────────── */
+  .eyebrow {
+    @apply text-[0.7rem] font-semibold uppercase tracking-[0.22em] text-caramel-600;
+  }
+
+  .lede {
+    @apply text-base leading-relaxed text-cocoa-400 sm:text-lg;
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────── */
+  .btn {
+    @apply inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-full
+           text-sm font-semibold transition-all duration-300 ease-smooth
+           disabled:pointer-events-none disabled:opacity-50;
+  }
+
+  .btn-primary {
+    @apply btn bg-cocoa-800 px-6 py-3 text-cream-100 shadow-soft
+           hover:-translate-y-0.5 hover:bg-cocoa-900 hover:shadow-lift active:translate-y-0;
+  }
+
+  .btn-accent {
+    @apply btn bg-caramel-500 px-6 py-3 text-white shadow-soft
+           hover:-translate-y-0.5 hover:bg-caramel-600 hover:shadow-lift active:translate-y-0;
+  }
+
+  .btn-outline {
+    @apply btn border border-cocoa-200 bg-transparent px-6 py-3 text-cocoa-700
+           hover:border-cocoa-800 hover:bg-cocoa-800 hover:text-cream-100;
+  }
+
+  .btn-ghost {
+    @apply btn px-4 py-2.5 text-cocoa-500 hover:bg-cocoa-50 hover:text-cocoa-800;
+  }
+
+  .btn-danger {
+    @apply btn bg-red-600 px-5 py-2.5 text-white hover:bg-red-700;
+  }
+
+  .btn-sm {
+    @apply px-4 py-2 text-[0.8rem];
+  }
+
+  .btn-lg {
+    @apply px-8 py-4 text-base;
+  }
+
+  /* ── Surfaces ───────────────────────────────────────────────────────── */
+  .card {
+    @apply rounded-card border border-cream-300/70 bg-cream-50 shadow-soft;
+  }
+
+  .card-interactive {
+    @apply card transition-all duration-400 ease-smooth hover:-translate-y-1 hover:shadow-lift;
+  }
+
+  .panel {
+    @apply rounded-2xl border border-cream-300/70 bg-white/70 p-6 backdrop-blur;
+  }
+
+  /* ── Forms ──────────────────────────────────────────────────────────── */
+  .label {
+    @apply mb-1.5 block text-sm font-semibold text-cocoa-600;
+  }
+
+  .input {
+    @apply w-full rounded-xl border border-cream-400 bg-cream-50 px-4 py-3 text-[0.95rem] text-cocoa-800
+           placeholder:text-cocoa-200 transition-colors duration-200
+           focus:border-caramel-400 focus:bg-white focus:outline-none focus:ring-4 focus:ring-caramel-100;
+  }
+
+  .input-error {
+    @apply border-red-400 focus:border-red-500 focus:ring-red-100;
+  }
+
+  .select {
+    @apply input cursor-pointer appearance-none bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%237C5F4C' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-position: right 0.85rem center;
+    background-size: 1.05rem;
+  }
+
+  .field-error {
+    @apply mt-1.5 flex items-center gap-1 text-[0.8rem] font-medium text-red-600;
+  }
+
+  /* ── Badges ─────────────────────────────────────────────────────────── */
+  .badge {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.7rem] font-bold uppercase tracking-wide;
+  }
+  .badge-sale { @apply badge bg-blush-300 text-cocoa-800; }
+  .badge-new { @apply badge bg-caramel-200 text-caramel-800; }
+  .badge-best { @apply badge bg-cocoa-800 text-cream-100; }
+  .badge-out { @apply badge bg-cocoa-100 text-cocoa-400; }
+  .badge-success { @apply badge bg-emerald-100 text-emerald-700; }
+  .badge-warning { @apply badge bg-amber-100 text-amber-700; }
+  .badge-danger { @apply badge bg-red-100 text-red-700; }
+  .badge-info { @apply badge bg-sky-100 text-sky-700; }
+  .badge-neutral { @apply badge bg-cocoa-100 text-cocoa-500; }
+}
+
+@layer utilities {
+  /* Warm, layered page background used behind hero and CTA sections. */
+  .bg-warm-gradient {
+    background-image:
+      radial-gradient(ellipse 80% 60% at 15% 0%, rgba(234, 204, 163, 0.45), transparent 60%),
+      radial-gradient(ellipse 70% 60% at 90% 10%, rgba(242, 210, 213, 0.5), transparent 62%),
+      linear-gradient(180deg, #FDF8F1 0%, #F8F0E4 100%);
+  }
+
+  .bg-cocoa-gradient {
+    background-image:
+      radial-gradient(ellipse 60% 80% at 80% 0%, rgba(190, 123, 54, 0.28), transparent 60%),
+      linear-gradient(160deg, #33241A 0%, #241811 100%);
+  }
+
+  /* Fallback shown while a product photo loads — or if it never does. */
+  .bg-placeholder {
+    background-image:
+      radial-gradient(circle at 30% 25%, rgba(255, 255, 255, 0.55), transparent 45%),
+      linear-gradient(140deg, #EACCA3 0%, #DCAF75 45%, #E6B1B7 100%);
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Reveal-on-scroll: paired with the useReveal hook. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton {
+    @apply relative overflow-hidden bg-cream-300/80;
+  }
+  .skeleton::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  .hide-scroll-x {
+    scrollbar-width: none;
+  }
+
+  .grid-auto-fill-cards {
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+  }
+}
+
+/* Respect the user's motion preference across every animation we ship. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "sweet-lava",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sweet Lava — premium sweets & bakery e-commerce platform",
+  "scripts": {
+    "install:all": "npm install --prefix server && npm install --prefix client",
+    "db:check": "npm run db:check --prefix server",
+    "dev": "concurrently -n server,client -c magenta,cyan \"npm run dev --prefix server\" \"npm run dev --prefix client\"",
+    "dev:server": "npm run dev --prefix server",
+    "dev:client": "npm run dev --prefix client",
+    "seed": "npm run seed --prefix server",
+    "build": "npm run build --prefix client",
+    "cloudinary:check": "npm run cloudinary:check --prefix server",
+    "paymob:check": "npm run paymob:check --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

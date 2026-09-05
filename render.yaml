@@ -1,0 +1,64 @@
+# Render blueprint. Import this repo at dashboard.render.com > New > Blueprint,
+# then fill the secret values marked sync:false in the dashboard.
+services:
+  - type: web
+    name: sweet-lava-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: server
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: CLOUDINARY_FOLDER
+        value: sweet-lava
+      - key: PAYMOB_BASE_URL
+        value: https://accept.paymob.com/api
+      - key: PAYMOB_CURRENCY
+        value: EGP
+      - key: RATE_LIMIT_WINDOW_MINUTES
+        value: "15"
+      - key: RATE_LIMIT_MAX
+        value: "300"
+      # Render provides the public URL of this service.
+      - key: SERVER_URL
+        fromService:
+          type: web
+          name: sweet-lava-api
+          property: host
+      # --- set these in the Render dashboard ---
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: COOKIE_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: PAYMOB_API_KEY
+        sync: false
+      - key: PAYMOB_INTEGRATION_ID
+        sync: false
+      - key: PAYMOB_IFRAME_ID
+        sync: false
+      - key: PAYMOB_HMAC_SECRET
+        sync: false
