@@ -1,4 +1,7 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
@@ -12,6 +15,7 @@ import routes from './routes/index.js';
 import { notFound } from './middleware/notFound.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { globalLimiter } from './middleware/rateLimiter.js';
+import ApiError from './utils/ApiError.js';
 
 const app = express();
 
@@ -29,25 +33,25 @@ app.use(
 
 const allowedOrigins = [
   ...env.allowedOrigins,
+  // When Express also serves the client, the app calls the API from this very origin.
+  env.serverUrl.replace(/\/$/, ''),
   ...(env.isProd ? [] : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4173']),
-];
+].filter(Boolean);
 
 /** Vercel preview deployments get a generated subdomain per commit. */
 const isVercelPreview = (origin) => /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin);
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      // Same-origin and server-to-server requests carry no Origin header.
-      if (!origin) return callback(null, true);
-      const clean = origin.replace(/\/$/, '');
-      if (allowedOrigins.includes(clean) || isVercelPreview(clean)) return callback(null, true);
-      return callback(new Error('This origin is not allowed by CORS.'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
-  }),
-);
+const corsMiddleware = cors({
+  origin(origin, callback) {
+    // Same-origin and server-to-server requests carry no Origin header.
+    if (!origin) return callback(null, true);
+    const clean = origin.replace(/\/$/, '');
+    if (allowedOrigins.includes(clean) || isVercelPreview(clean)) return callback(null, true);
+    return callback(ApiError.forbidden('This origin is not allowed to call the API.'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
+});
 
 /* ── Parsing ──────────────────────────────────────────────────────────── */
 app.use(express.json({ limit: '1mb' }));
@@ -63,11 +67,34 @@ app.use(compression());
 if (!env.isProd) app.use(morgan('dev'));
 
 /* ── Routes ───────────────────────────────────────────────────────────── */
-app.use('/api', globalLimiter, routes);
+app.use('/api', corsMiddleware, globalLimiter, routes);
 
-app.get('/', (_req, res) =>
-  res.json({ success: true, message: 'Sweet Lava API', docs: '/api/health', version: '1.0.0' }),
-);
+/**
+ * Single-service deployment: when the client has been built, Express serves it.
+ * The API and the storefront then share one origin, which removes CORS from the
+ * picture entirely. When there is no build (local development, where Vite serves
+ * the client) the root route falls back to a plain API banner.
+ */
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const clientDist = path.resolve(__dirname, '../../client/dist');
+const hasClientBuild = fs.existsSync(path.join(clientDist, 'index.html'));
+
+if (hasClientBuild) {
+  // Hashed asset filenames are safe to cache forever.
+  app.use(express.static(clientDist, { index: false, maxAge: '1y', etag: true }));
+
+  // Anything that is not an API call is handed to the React router.
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    // index.html must never be cached, or clients pin to an old asset manifest.
+    res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+    return res.sendFile(path.join(clientDist, 'index.html'));
+  });
+} else {
+  app.get('/', (_req, res) =>
+    res.json({ success: true, message: 'Sweet Lava API', docs: '/api/health', version: '1.0.0' }),
+  );
+}
 
 app.use(notFound);
 app.use(errorHandler);

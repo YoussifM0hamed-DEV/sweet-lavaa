@@ -1,126 +1,81 @@
 # Deploying Sweet Lava
 
-Backend on **Render**, frontend on **Vercel**, database on **MongoDB Atlas**, media on **Cloudinary**.
+**One Render service serves both the API and the storefront.** Express serves the built React app,
+so there is a single URL, no CORS to configure, and nothing to keep in sync between two hosts.
 
-There is a chicken-and-egg problem: the backend needs to know the frontend URL (for CORS) and the
-frontend needs to know the backend URL. The order below deals with it — deploy the backend first
-with a placeholder, then come back and fix it in step 4.
+Database stays on **MongoDB Atlas**, media on **Cloudinary**.
 
 ---
 
 ## 0. Push to GitHub
 
-Both hosts deploy from a repository.
-
 ```bash
-cd d:\sweet-lava
-git init
-git add .
-git commit -m "Sweet Lava"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/sweet-lava.git
-git push -u origin main
+git add -A
+git commit -m "your message"
+git push
 ```
 
-`.gitignore` already excludes `.env`, so no secrets are committed. Confirm before pushing:
-
-```bash
-git status --porcelain | findstr ".env"
-```
-
-That should print nothing.
+`.gitignore` excludes `.env` and `render-env.txt`, so no secrets are committed.
 
 ---
 
-## 1. Prepare Atlas for production
+## 1. Create the Render service
 
-Your cluster currently allows connections from anywhere, which was fine locally.
+[dashboard.render.com](https://dashboard.render.com) -> **New** -> **Web Service** -> connect the repo.
 
-1. **Network Access** → keep `0.0.0.0/0`. Render does not publish static outbound IPs on the free
-   plan, so restricting by IP is not practical there. The database is still protected by its
-   username and password.
-2. Consider a separate database user for production with a fresh password.
+| Field | Value |
+| --- | --- |
+| Name | `sweet-lavaa` |
+| Language | Node |
+| Branch | `main` |
+| Region | Frankfurt (EU Central) |
+| **Root Directory** | **leave empty** (repo root) |
+| **Build Command** | `npm run build` |
+| **Start Command** | `npm start` |
+| Health Check Path | `/api/health` |
+| Instance Type | Free |
 
----
+`npm run build` installs both halves and builds the client into `client/dist`.
+`npm start` boots Express, which detects that build and serves it.
 
-## 2. Deploy the backend to Render
-
-1. [dashboard.render.com](https://dashboard.render.com) → **New** → **Web Service** → connect your repo.
-2. Settings:
-
-   | Field | Value |
-   | --- | --- |
-   | Root Directory | `server` |
-   | Runtime | Node |
-   | Build Command | `npm ci` |
-   | Start Command | `npm start` |
-   | Health Check Path | `/api/health` |
-
-3. **Environment** → add every variable from your local `server/.env`, with these changes:
-
-   ```
-   NODE_ENV=production
-   CLIENT_URL=https://placeholder.vercel.app     ← fixed in step 4
-   SERVER_URL=https://sweet-lava-api.onrender.com ← your own Render URL
-   ```
-
-   Generate **fresh** secrets for production rather than reusing the local ones:
-
-   ```bash
-   node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"
-   ```
-
-   Do that three times, for `JWT_SECRET`, `JWT_REFRESH_SECRET` and `COOKIE_SECRET`.
-
-4. **Create Web Service**, wait for the build, then confirm:
-
-   ```
-   https://YOUR-API.onrender.com/api/health
-   ```
-
-   You should get `{"success":true,...}`. **Copy this URL.**
-
-> The free plan sleeps after 15 minutes of inactivity. The first request afterwards takes
-> roughly 50 seconds while it wakes up. That is normal, not a bug.
+> Root Directory must be **empty**, not `server`. The build needs the whole repo.
 
 ---
 
-## 3. Deploy the frontend to Vercel
+## 2. Environment variables
 
-1. [vercel.com/new](https://vercel.com/new) → import the same repo.
-2. Set **Root Directory** to `client`. Vercel reads the rest from `client/vercel.json`.
-3. **Environment Variables**:
+Open `render-env.txt` (generated locally, git-ignored), copy all of it, and use
+Render's **Add from .env** button to paste it in one go.
 
-   ```
-   VITE_API_URL=https://YOUR-API.onrender.com/api
-   VITE_GOOGLE_CLIENT_ID=527915991868-....apps.googleusercontent.com
-   ```
+Two values to check:
 
-   Note `VITE_API_URL` ends with `/api`.
+```
+SERVER_URL=https://sweet-lavaa.onrender.com   <- must match your actual Render URL
+CLIENT_URL=                                    <- not needed for single-service; safe to delete
+```
 
-4. **Deploy**, then copy the resulting URL, e.g. `https://sweet-lava.vercel.app`.
+`VITE_API_URL` is **not** set on Render. The client is built with the relative default `/api`,
+which resolves to the same service.
 
 ---
 
-## 4. Connect the two
+## 3. Deploy and verify
 
-Back in **Render** → **Environment** → set:
+Click **Deploy**. The first build takes 3-6 minutes.
 
-```
-CLIENT_URL=https://sweet-lava.vercel.app
-```
-
-Save. Render redeploys automatically.
-
-`CLIENT_URL` accepts a comma-separated list if you add a custom domain later:
+Then check both halves on the one URL:
 
 ```
-CLIENT_URL=https://sweetlava.com,https://sweet-lava.vercel.app
+https://sweet-lavaa.onrender.com/api/health   -> {"success":true,...}
+https://sweet-lavaa.onrender.com/             -> the storefront
+https://sweet-lavaa.onrender.com/products     -> loads directly (SPA fallback works)
 ```
-
-Vercel preview deployments (`*.vercel.app`) are allowed automatically.
 
 ---
+
+## 4. Redeploys
+
+Every push to `main` triggers a rebuild automatically.
 
 ## 5. Seed the production database
 
@@ -141,11 +96,11 @@ Afterwards, sign in as the seeded admin and immediately change its password from
 
 ## 6. Update Google OAuth for production
 
-[console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) → your
-OAuth client → **Authorised JavaScript origins** → add:
+[console.cloud.google.com/apis/credentials](https://console.cloud.google.com/apis/credentials) -> your
+OAuth client -> **Authorised JavaScript origins** -> add your Render URL:
 
 ```
-https://sweet-lava.vercel.app
+https://sweet-lavaa.onrender.com
 ```
 
 Keep `http://localhost:5173` so local development keeps working.
@@ -163,8 +118,8 @@ because Render gives you a public HTTPS URL.
 In the Paymob dashboard → **Developers** → **Payment Integrations** → edit your integration:
 
 ```
-Transaction processed callback : https://YOUR-API.onrender.com/api/payments/paymob/webhook
-Transaction response callback  : https://YOUR-API.onrender.com/api/payments/paymob/callback
+Transaction processed callback : https://sweet-lavaa.onrender.com/api/payments/paymob/webhook
+Transaction response callback  : https://sweet-lavaa.onrender.com/api/payments/paymob/callback
 ```
 
 Then add the four Paymob variables to Render's environment and verify:
