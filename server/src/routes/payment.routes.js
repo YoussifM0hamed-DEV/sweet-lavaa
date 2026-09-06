@@ -7,11 +7,11 @@ const router = Router();
 
 router.get('/config', payment.getPaymentConfig);
 
-/* Paymob calls these — they are unauthenticated by design and secured by HMAC. */
-router.post('/paymob/webhook', payment.paymobWebhook);
-router.get('/paymob/callback', payment.paymobRedirect);
+/* Fawaterak calls these — unauthenticated by design, secured by the hashKey. */
+router.post('/fawaterak/webhook', payment.fawaterakWebhook);
+router.get('/fawaterak/callback', payment.fawaterakRedirect);
 
-router.post('/paymob/initiate/:orderId', protect, paymentLimiter, payment.initiatePayment);
+router.post('/fawaterak/initiate/:orderId', protect, paymentLimiter, payment.initiatePayment);
 router.get('/status/:orderId', protect, payment.getPaymentStatus);
 
 export default router;

@@ -29,7 +29,7 @@ const SECTIONS = [
   {
     heading: 'Payment information',
     body: [
-      'Card payments are handled entirely by Paymob. Your card number, expiry date and security code are entered on their secure page and never pass through our servers.',
+      'We do not take card payments, so no card details are ever entered on this site or stored by us. Orders are paid in cash on delivery.',
       'We store only the transaction reference, the amount, the payment method type and the status, which is what we need to reconcile and support your order.',
     ],
   },
@@ -48,7 +48,7 @@ const SECTIONS = [
   {
     heading: 'Who we share it with',
     body: [
-      'We share the minimum necessary with the services that make an order possible: our payment provider (Paymob), our image hosting provider (Cloudinary), our delivery couriers, and our hosting provider.',
+      'We share the minimum necessary with the services that make an order possible: our image hosting provider (Cloudinary), our delivery couriers, and our hosting provider.',
       'We may disclose information where the law requires it, or to protect our rights and the safety of our customers and staff. We do not sell or rent your personal data to anyone.',
     ],
   },

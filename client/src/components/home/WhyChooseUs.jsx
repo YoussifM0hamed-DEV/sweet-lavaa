@@ -20,8 +20,8 @@ const BENEFITS = [
   },
   {
     icon: FiShield,
-    title: 'Secure checkout',
-    description: 'Card and wallet payments handled by Paymob. We never see your card details.',
+    title: 'Pay on delivery',
+    description: 'Pay the courier in cash when your order arrives. Nothing is charged up front.',
   },
   {
     icon: FiHeart,

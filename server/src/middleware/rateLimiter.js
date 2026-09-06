@@ -13,6 +13,8 @@ export const globalLimiter = rateLimit({
   ...base,
   windowMs: env.rateLimit.windowMs,
   max: env.rateLimit.max,
+  // Never throttle the platform health check — a 429 there reads as an outage and triggers a restart.
+  skip: (req) => env.nodeEnv === 'test' || req.path === '/health',
   message: jsonMessage('Too many requests from this IP. Please try again shortly.'),
 });
 

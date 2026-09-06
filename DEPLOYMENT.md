@@ -144,32 +144,45 @@ https://sweet-lavaa.vercel.app
 
 Keep `http://localhost:5173` so local development keeps working.
 
+Verify the ids line up on both sides before you test:
+
+```bash
+npm run google:check --prefix server
+```
+
+Leave **Authorised redirect URIs** empty — the front end uses the ID-token flow, so Google never
+redirects anywhere and that list is not consulted.
+
 While you are there, **Audience** → **Publish app** if you want anyone other than your test users
 to be able to sign in.
 
 ---
 
-## 7. Paymob
+## 7. Fawaterak
 
 This is the step that needed a tunnel locally. With a deployed backend it is straightforward,
 because Render gives you a public HTTPS URL.
 
-In the Paymob dashboard → **Developers** → **Payment Integrations** → edit your integration:
+In the Fawaterak dashboard → **Integration** → **Webhooks**, set:
 
 ```
-Transaction processed callback : https://sweet-lavaa.onrender.com/api/payments/paymob/webhook
-Transaction response callback  : https://sweet-lavaa.onrender.com/api/payments/paymob/callback
+Webhook URL : https://sweet-lavaa.onrender.com/api/payments/fawaterak/webhook
 ```
 
-Then add the four Paymob variables to Render's environment and verify:
+The success / fail / pending URLs need no setup — they are sent with every invoice.
+
+Then add the two Fawaterak secrets to Render's environment and verify:
 
 ```bash
-npm run paymob:check
+npm run fawaterak:check
 ```
 
-One caveat specific to Render's free plan: if the service is asleep when Paymob posts the webhook,
-the request may time out. Paymob retries, and the redirect handler independently re-fetches the
-transaction, so an order still settles correctly — but a paid plan avoids the delay entirely.
+Switch `FAWATERAK_BASE_URL` to `https://app.fawaterk.com` and swap in your live keys when you go
+live; staging keys do not work against the live host.
+
+One caveat specific to Render's free plan: if the service is asleep when Fawaterak posts the
+webhook, the request may time out. The redirect handler independently re-reads the invoice, so an
+order still settles correctly — but a paid plan avoids the delay entirely.
 
 ---
 
@@ -183,7 +196,7 @@ transaction, so an order still settles correctly — but a paid plan avoids the 
 | `VITE_API_URL` | `/api` (Vite proxy) | Render URL + `/api` |
 | JWT secrets | local values | **freshly generated** |
 | Google origins | `http://localhost:5173` | both |
-| Paymob callbacks | tunnel URL | Render URL |
+| Fawaterak webhook | tunnel URL | Render URL |
 
 ---
 

@@ -312,8 +312,8 @@ const ProductDetails = () => {
               <div className="flex gap-3">
                 <FiShield className="mt-0.5 shrink-0 text-caramel-600" />
                 <div>
-                  <p className="text-sm font-semibold text-cocoa-700">Secure payment</p>
-                  <p className="text-xs text-cocoa-400">Card and wallet payments handled by Paymob.</p>
+                  <p className="text-sm font-semibold text-cocoa-700">Pay on delivery</p>
+                  <p className="text-xs text-cocoa-400">Pay the courier in cash when your order arrives.</p>
                 </div>
               </div>
             </div>

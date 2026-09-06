@@ -63,21 +63,23 @@ export const env = {
     },
   },
 
-  paymob: {
-    apiKey: process.env.PAYMOB_API_KEY || '',
-    integrationId: process.env.PAYMOB_INTEGRATION_ID || '',
-    iframeId: process.env.PAYMOB_IFRAME_ID || '',
-    hmacSecret: process.env.PAYMOB_HMAC_SECRET || '',
-    baseUrl: process.env.PAYMOB_BASE_URL || 'https://accept.paymob.com/api',
-    currency: process.env.PAYMOB_CURRENCY || 'EGP',
+  fawaterak: {
+    // Dashboard > Integrations > "HASH API key". One value, two jobs: the
+    // bearer token for the v2 API, and the secret the webhook hashKey is
+    // signed with. (The OAuth client on that page issues tokens v2 rejects.)
+    apiKey: process.env.FAWATERAK_API_KEY || '',
+    vendorKey: process.env.FAWATERAK_VENDOR_KEY || process.env.FAWATERAK_API_KEY || '',
+    // staging.fawaterk.com while testing, app.fawaterk.com once live.
+    baseUrl: (process.env.FAWATERAK_BASE_URL || 'https://staging.fawaterk.com').replace(/\/$/, ''),
+    currency: process.env.FAWATERAK_CURRENCY || 'EGP',
     get enabled() {
-      return Boolean(process.env.PAYMOB_API_KEY && process.env.PAYMOB_INTEGRATION_ID && process.env.PAYMOB_IFRAME_ID);
+      return Boolean(process.env.FAWATERAK_API_KEY);
     },
   },
 
   rateLimit: {
     windowMs: num(process.env.RATE_LIMIT_WINDOW_MINUTES, 15) * 60 * 1000,
-    max: num(process.env.RATE_LIMIT_MAX, 300),
+    max: num(process.env.RATE_LIMIT_MAX, 1000),
   },
 
   seed: {

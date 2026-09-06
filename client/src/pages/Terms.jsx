@@ -33,7 +33,7 @@ const SECTIONS = [
   {
     heading: 'Payment',
     body: [
-      'Card and wallet payments are processed by Paymob. We do not receive or store your full card details.',
+      'Orders are paid in cash to the courier on delivery. We do not take card payments at the moment.',
       'An order is treated as paid only once our server has verified the payment result with the provider. Where cash on delivery is available, payment is due to the courier on arrival.',
     ],
   },

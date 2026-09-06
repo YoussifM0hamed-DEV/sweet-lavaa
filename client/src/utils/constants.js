@@ -17,7 +17,7 @@ export const PAYMENT_STATUS_META = {
 };
 
 export const PAYMENT_METHOD_META = {
-  card: { label: 'Card / Wallet', description: 'Secure payment via Paymob' },
+  card: { label: 'Card / Wallet', description: 'Secure payment via Fawaterak' },
   wallet: { label: 'Mobile wallet', description: 'Pay from your mobile wallet' },
   cash_on_delivery: { label: 'Cash on delivery', description: 'Pay the courier when it arrives' },
 };

@@ -365,7 +365,7 @@ const OrderDetails = () => {
               </Button>
 
               <p className="text-xs leading-relaxed text-cocoa-300">
-                Online payments are confirmed automatically from the verified Paymob webhook. Change this manually only
+                Online payments are confirmed automatically from the verified Fawaterak webhook. Change this manually only
                 to reconcile cash or a refund.
               </p>
             </div>

@@ -280,7 +280,7 @@ const Cart = () => {
                 </Button>
 
                 <p className="mt-4 text-center text-xs leading-relaxed text-cocoa-300">
-                  Secure payment by Paymob. Delivery fees and any discounts are confirmed on the next step.
+                  Pay cash on delivery. Delivery fees and any discounts are confirmed on the next step.
                 </p>
               </div>
             </aside>

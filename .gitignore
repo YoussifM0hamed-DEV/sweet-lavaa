@@ -13,3 +13,4 @@ coverage/
 .idea/
 uploads/
 render-env.txt
+vercel-env.txt

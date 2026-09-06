@@ -11,7 +11,7 @@ import Button from '../components/ui/Button.jsx';
 import SmartImage from '../components/ui/SmartImage.jsx';
 import Spinner from '../components/ui/Spinner.jsx';
 import { deliveryZoneService } from '../services/catalogService.js';
-import { orderService } from '../services/commerceService.js';
+import { orderService, paymentService } from '../services/commerceService.js';
 import { useCart } from '../context/CartContext.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSettings } from '../context/SettingsContext.jsx';
@@ -76,6 +76,7 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState('');
+  const [allowCard, setAllowCard] = useState(false);
 
   const [form, setForm] = useState({
     fullName: '',
@@ -91,9 +92,31 @@ const Checkout = () => {
     notes: '',
     deliveryZone: '',
     couponCode: '',
-    paymentMethod: 'card',
+    paymentMethod: 'cash_on_delivery',
     saveAddress: true,
   });
+
+  /*
+   * The card option only appears when the server has a payment provider
+   * configured, so switching one on needs no front-end change.
+   */
+  useEffect(() => {
+    let cancelled = false;
+
+    paymentService
+      .config()
+      .then((response) => {
+        if (!cancelled) setAllowCard(Boolean(response.data?.fawaterakEnabled));
+      })
+      .catch(() => {
+        /* Treat an unreachable config as "cash only" rather than offering a
+           card payment we cannot actually take. */
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   /* Prefill from the profile and the default saved address. */
   useEffect(() => {
@@ -277,6 +300,7 @@ const Checkout = () => {
   const pricing = quote?.pricing || { subtotal: 0, discount: 0, deliveryFee: 0, tax: 0, total: 0 };
   const issues = quote?.issues || [];
   const allowCod = settings.commerce?.allowCashOnDelivery !== false;
+  const methods = [...(allowCard ? ['card'] : []), ...(allowCod ? ['cash_on_delivery'] : [])];
 
   return (
     <>
@@ -524,7 +548,7 @@ const Checkout = () => {
                 <div className="mt-7">
                   <p className="label">Payment method</p>
                   <div className="space-y-2.5">
-                    {['card', ...(allowCod ? ['cash_on_delivery'] : [])].map((method) => {
+                    {methods.map((method) => {
                       const meta = PAYMENT_METHOD_META[method];
                       const selected = form.paymentMethod === method;
                       return (

@@ -181,7 +181,7 @@ const Footer = () => {
             &copy; {new Date().getFullYear()} {storeName}. All rights reserved.
           </p>
           <p className="flex items-center gap-1.5">
-            Baked with care in Cairo <span aria-hidden="true">·</span> Secure payments by Paymob
+            Baked with care in Cairo <span aria-hidden="true">·</span> Cash on delivery across Egypt
           </p>
         </div>
       </div>

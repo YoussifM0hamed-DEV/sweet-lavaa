@@ -24,7 +24,7 @@ export const createOrderSchema = z.object({
   }),
   deliveryZone: objectId,
   couponCode: z.string().trim().max(30).optional().nullable(),
-  paymentMethod: z.enum(Object.values(PAYMENT_METHODS)).optional().default(PAYMENT_METHODS.CARD),
+  paymentMethod: z.enum(Object.values(PAYMENT_METHODS)).optional().default(PAYMENT_METHODS.COD),
   customerNotes: z.string().trim().max(500).optional().default(''),
   saveAddress: z.boolean().optional().default(false),
 });

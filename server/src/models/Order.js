@@ -76,9 +76,10 @@ const orderSchema = new mongoose.Schema(
     payment: {
       method: { type: String, enum: Object.values(PAYMENT_METHODS), default: PAYMENT_METHODS.CARD },
       status: { type: String, enum: Object.values(PAYMENT_STATUS), default: PAYMENT_STATUS.PENDING, index: true },
-      provider: { type: String, default: 'paymob' },
+      provider: { type: String, default: 'fawaterak' },
       transactionId: { type: String, default: null },
-      paymobOrderId: { type: String, default: null },
+      invoiceId: { type: String, default: null, index: true },
+      invoiceKey: { type: String, default: null },
       paidAt: { type: Date, default: null },
       failureReason: { type: String, default: '' },
       refundedAt: { type: Date, default: null },

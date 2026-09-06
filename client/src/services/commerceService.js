@@ -32,7 +32,7 @@ export const orderService = {
 
 export const paymentService = {
   config: () => apiClient.get('/payments/config'),
-  initiate: (orderId) => apiClient.post(`/payments/paymob/initiate/${orderId}`),
+  initiate: (orderId) => apiClient.post(`/payments/fawaterak/initiate/${orderId}`),
   status: (orderId) => apiClient.get(`/payments/status/${orderId}`),
 };
 

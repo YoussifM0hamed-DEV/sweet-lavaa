@@ -54,7 +54,7 @@ const FAQ_GROUPS = [
     items: [
       {
         q: 'What payment methods do you accept?',
-        a: 'Card and mobile wallet payments through Paymob, plus cash on delivery where available. We never see or store your card details.',
+        a: 'Cash on delivery — you pay the courier when your order arrives. Card payments are not available at the moment.',
       },
       {
         q: 'My payment failed but I was charged. What now?',

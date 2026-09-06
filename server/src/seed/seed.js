@@ -249,7 +249,7 @@ const seedOrders = async ({ customers, products, zones, categories }) => {
       payment: {
         method: index % 4 === 0 ? PAYMENT_METHODS.COD : PAYMENT_METHODS.CARD,
         status: status === ORDER_STATUS.CANCELLED ? PAYMENT_STATUS.FAILED : isPaid ? PAYMENT_STATUS.PAID : PAYMENT_STATUS.PENDING,
-        provider: index % 4 === 0 ? 'cash' : 'paymob',
+        provider: index % 4 === 0 ? 'cash' : 'fawaterak',
         transactionId: isPaid ? `TXN${randomInt(100000, 999999)}` : null,
         paidAt: isPaid ? createdAt : null,
       },
