@@ -33,9 +33,12 @@ Then open the service -> **Settings**:
 
 | Field | Value |
 | --- | --- |
-| **Root Directory** | `server` |
+| **Root Directory** | `server` (recommended) or leave empty |
 | Branch | `main` |
-| Build / Start | leave empty — `server/railway.json` sets them |
+| Build / Start | leave empty — a `railway.json` sets them |
+
+There is a `railway.json` at the repo root **and** in `server/`, so the service builds and starts
+correctly either way. Railway reads the one inside whatever Root Directory is set.
 
 `server/railway.json` pins the build command, the start command and `/api/health` as the
 healthcheck, so a broken deploy is rolled back instead of served.
