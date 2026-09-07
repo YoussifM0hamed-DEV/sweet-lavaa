@@ -14,3 +14,4 @@ coverage/
 uploads/
 render-env.txt
 vercel-env.txt
+railway-env.txt

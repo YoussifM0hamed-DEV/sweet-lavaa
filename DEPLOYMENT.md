@@ -1,6 +1,6 @@
 # Deploying Sweet Lava
 
-**API on Render, frontend on Vercel**, database on MongoDB Atlas, media on Cloudinary.
+**API on Railway or Render, frontend on Vercel**, database on MongoDB Atlas, media on Cloudinary.
 
 There is a chicken-and-egg problem: the API needs the frontend URL (for CORS) and the frontend
 needs the API URL. Deploy the API first with a placeholder, then fix it in step 4.
@@ -15,11 +15,49 @@ git commit -m "your message"
 git push
 ```
 
-`.gitignore` excludes `.env` and `render-env.txt`, so no secrets are committed.
+`.gitignore` excludes `.env`, `render-env.txt` and `railway-env.txt`, so no secrets are committed.
 
 ---
 
-## 1. Deploy the API to Render
+## 1. Deploy the API — Railway (recommended) or Render
+
+Pick one. Railway never sleeps, so the first customer of the day does not wait for a
+cold start; Render's free plan does, and its paid plan is a flat $7.
+
+<details open>
+<summary><strong>Option A — Railway</strong></summary>
+
+[railway.com](https://railway.com) -> **New Project** -> **Deploy from GitHub repo** -> `sweet-lavaa`.
+
+Then open the service -> **Settings**:
+
+| Field | Value |
+| --- | --- |
+| **Root Directory** | `server` |
+| Branch | `main` |
+| Build / Start | leave empty — `server/railway.json` sets them |
+
+`server/railway.json` pins the build command, the start command and `/api/health` as the
+healthcheck, so a broken deploy is rolled back instead of served.
+
+Under **Settings -> Networking**, click **Generate Domain** and copy the URL.
+
+### Environment variables
+
+Open `railway-env.txt` (generated locally, git-ignored), then in Railway:
+**Variables -> Raw Editor -> paste the whole file.**
+
+Two rules:
+
+- **Never add `PORT`.** Railway injects it; hardcoding it makes the healthcheck fail.
+- Set `SERVER_URL` to the domain you just generated.
+
+</details>
+
+<details>
+<summary><strong>Option B — Render</strong></summary>
+
+
 
 [dashboard.render.com](https://dashboard.render.com) -> **New** -> **Web Service** -> connect the repo.
 
@@ -58,6 +96,9 @@ The root URL returns a small JSON banner — that is expected, the storefront li
 **Copy the Render URL.**
 
 > The free plan sleeps after 15 minutes idle. The next request takes ~50 seconds to wake it.
+> The $7 Starter plan stays awake.
+
+</details>
 
 ---
 
@@ -76,11 +117,12 @@ Everything else comes from `client/vercel.json`, including the SPA rewrite that 
 ### Environment variables
 
 ```
-VITE_API_URL=https://sweet-lavaa.onrender.com/api
+VITE_API_URL=https://<your-api-domain>/api
 VITE_GOOGLE_CLIENT_ID=527915991868-....apps.googleusercontent.com
 ```
 
-`VITE_API_URL` **must end with `/api`** and point at Render.
+`VITE_API_URL` **must end with `/api`** and point at the domain from step 1
+(`*.up.railway.app` or `*.onrender.com`).
 
 Deploy, then copy the Vercel URL.
 
@@ -89,15 +131,15 @@ Deploy, then copy the Vercel URL.
 
 ---
 
-## 3. Point Render back at Vercel
+## 3. Point the API back at Vercel
 
-Render -> **Environment** -> set:
+In your API host's environment (Railway **Variables**, Render **Environment**), set:
 
 ```
 CLIENT_URL=https://sweet-lavaa.vercel.app
 ```
 
-Save; Render redeploys. Without this, every request from the frontend fails CORS with a 403.
+Save; the service redeploys. Without this, every request from the frontend fails CORS with a 403.
 
 `CLIENT_URL` accepts a comma-separated list for a custom domain later:
 
@@ -111,7 +153,7 @@ Vercel preview deployments (`*.vercel.app`) are allowed automatically.
 
 ## 4. Check it end to end
 
-Open the Vercel URL. The storefront should load products from Render.
+Open the Vercel URL. The storefront should load products from the API.
 If it is empty, open DevTools -> Network and look for CORS errors, then re-check step 3.
 
 ## 5. Seed the production database
@@ -158,7 +200,10 @@ to be able to sign in.
 
 ---
 
-## 7. Fawaterak
+## 7. Fawaterak — currently disabled
+
+> Online payment is **off**: the store is cash on delivery only, and `FAWATERAK_API_KEY`
+> is deliberately left empty. Skip this section unless you are switching card payments back on.
 
 This is the step that needed a tunnel locally. With a deployed backend it is straightforward,
 because Render gives you a public HTTPS URL.
@@ -192,18 +237,18 @@ order still settles correctly — but a paid plan avoids the delay entirely.
 | --- | --- | --- |
 | `NODE_ENV` | `development` | `production` |
 | `CLIENT_URL` | `http://localhost:5173` | Vercel URL |
-| `SERVER_URL` | `http://localhost:5000` | Render URL |
-| `VITE_API_URL` | `/api` (Vite proxy) | Render URL + `/api` |
+| `SERVER_URL` | `http://localhost:5000` | API URL |
+| `VITE_API_URL` | `/api` (Vite proxy) | API URL + `/api` |
+| `PORT` | `5000` | **unset** — the host injects it |
 | JWT secrets | local values | **freshly generated** |
 | Google origins | `http://localhost:5173` | both |
-| Fawaterak webhook | tunnel URL | Render URL |
 
 ---
 
 ## Troubleshooting
 
 **CORS error in the browser console**
-`CLIENT_URL` on Render does not exactly match the Vercel origin. No trailing slash, and `https://`.
+`CLIENT_URL` on the API does not exactly match the Vercel origin. No trailing slash, and `https://`.
 
 **404 when refreshing on `/products`**
 `client/vercel.json` was not picked up — check that Vercel's Root Directory is `client`.
@@ -211,8 +256,19 @@ order still settles correctly — but a paid plan avoids the delay entirely.
 **First request takes ~50 seconds**
 Render free plan cold start. Expected.
 
-**`Missing required environment variables` in Render logs**
-`MONGODB_URI` or `JWT_SECRET` was not set in the Render environment.
+**`Missing required environment variables` in the deploy logs**
+`MONGODB_URI` or `JWT_SECRET` was not set in the service's environment.
+
+**Railway healthcheck fails but the logs say the server started**
+A hardcoded `PORT` variable. Delete it — Railway assigns the port and the server reads it.
+
+**The frontend still calls the old API host after switching**
+`VITE_API_URL` is baked in at build time. Change it in Vercel, then **Redeploy** — saving alone
+does nothing.
+
+**`MongooseServerSelectionError` on the deployed API**
+Atlas is blocking the host's IP. Network Access -> add `0.0.0.0/0`; neither Railway nor Render
+has a fixed outbound IP on these plans.
 
 **Login works but every later request is 401**
 `VITE_API_URL` is wrong, or the frontend was built before the variable was set. Vercel bakes
