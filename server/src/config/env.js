@@ -64,6 +64,21 @@ export const env = {
   },
 
 
+  mail: {
+    // Gmail works with an App Password (not the account password) once
+    // 2-Step Verification is on. Any other SMTP provider works the same way.
+    host: process.env.SMTP_HOST || 'smtp.gmail.com',
+    port: num(process.env.SMTP_PORT, 465),
+    user: process.env.SMTP_USER || '',
+    pass: process.env.SMTP_PASS || '',
+    from: process.env.MAIL_FROM || '',
+    // Where "a new order came in" goes. Falls back to the sending account.
+    notify: process.env.MAIL_NOTIFY || process.env.SMTP_USER || '',
+    get enabled() {
+      return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS);
+    },
+  },
+
   rateLimit: {
     windowMs: num(process.env.RATE_LIMIT_WINDOW_MINUTES, 15) * 60 * 1000,
     max: num(process.env.RATE_LIMIT_MAX, 1000),
