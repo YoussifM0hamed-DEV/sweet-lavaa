@@ -209,34 +209,16 @@ to be able to sign in.
 
 ---
 
-## 7. Fawaterak — currently disabled
+## 7. Payments
 
-> Online payment is **off**: the store is cash on delivery only, and `FAWATERAK_API_KEY`
-> is deliberately left empty. Skip this section unless you are switching card payments back on.
+The store is **cash on delivery only** — there is no payment gateway, no card details are
+handled anywhere, and nothing needs configuring here.
 
-This is the step that needed a tunnel locally. With a deployed backend it is straightforward,
-because Render gives you a public HTTPS URL.
+Orders are confirmed as soon as they are placed; mark one paid from
+**Admin → Orders → the order → Payment status** once the courier has collected.
 
-In the Fawaterak dashboard → **Integration** → **Webhooks**, set:
-
-```
-Webhook URL : https://sweet-lavaa.onrender.com/api/payments/fawaterak/webhook
-```
-
-The success / fail / pending URLs need no setup — they are sent with every invoice.
-
-Then add the two Fawaterak secrets to Render's environment and verify:
-
-```bash
-npm run fawaterak:check
-```
-
-Switch `FAWATERAK_BASE_URL` to `https://app.fawaterk.com` and swap in your live keys when you go
-live; staging keys do not work against the live host.
-
-One caveat specific to Render's free plan: if the service is asleep when Fawaterak posts the
-webhook, the request may time out. The redirect handler independently re-reads the invoice, so an
-order still settles correctly — but a paid plan avoids the delay entirely.
+Older orders show a `card` payment method: those predate the removal of online payment and are
+kept as they are. They still open and can still be edited.
 
 ---
 

@@ -365,8 +365,8 @@ const OrderDetails = () => {
               </Button>
 
               <p className="text-xs leading-relaxed text-cocoa-300">
-                Online payments are confirmed automatically from the verified Fawaterak webhook. Change this manually only
-                to reconcile cash or a refund.
+                Orders are cash on delivery, so mark them paid once the courier has collected. Older card
+                orders were settled by the retired online provider.
               </p>
             </div>
           </section>

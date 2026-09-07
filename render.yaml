@@ -19,10 +19,6 @@ services:
         value: 30d
       - key: CLOUDINARY_FOLDER
         value: sweet-lava
-      - key: FAWATERAK_BASE_URL
-        value: https://app.fawaterk.com
-      - key: FAWATERAK_CURRENCY
-        value: EGP
       - key: RATE_LIMIT_WINDOW_MINUTES
         value: "15"
       - key: RATE_LIMIT_MAX
@@ -50,6 +46,4 @@ services:
       - key: CLOUDINARY_API_KEY
         sync: false
       - key: CLOUDINARY_API_SECRET
-        sync: false
-      - key: FAWATERAK_API_KEY
         sync: false

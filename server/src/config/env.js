@@ -63,19 +63,6 @@ export const env = {
     },
   },
 
-  fawaterak: {
-    // Dashboard > Integrations > "HASH API key". One value, two jobs: the
-    // bearer token for the v2 API, and the secret the webhook hashKey is
-    // signed with. (The OAuth client on that page issues tokens v2 rejects.)
-    apiKey: process.env.FAWATERAK_API_KEY || '',
-    vendorKey: process.env.FAWATERAK_VENDOR_KEY || process.env.FAWATERAK_API_KEY || '',
-    // staging.fawaterk.com while testing, app.fawaterk.com once live.
-    baseUrl: (process.env.FAWATERAK_BASE_URL || 'https://staging.fawaterk.com').replace(/\/$/, ''),
-    currency: process.env.FAWATERAK_CURRENCY || 'EGP',
-    get enabled() {
-      return Boolean(process.env.FAWATERAK_API_KEY);
-    },
-  },
 
   rateLimit: {
     windowMs: num(process.env.RATE_LIMIT_WINDOW_MINUTES, 15) * 60 * 1000,

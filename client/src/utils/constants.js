@@ -16,10 +16,14 @@ export const PAYMENT_STATUS_META = {
   refunded: { label: 'Refunded', tone: 'neutral' },
 };
 
+/**
+ * Only cash on delivery is offered. The other two are kept so orders taken
+ * before online payment was removed still show a label instead of a blank.
+ */
 export const PAYMENT_METHOD_META = {
-  card: { label: 'Card / Wallet', description: 'Secure payment via Fawaterak' },
-  wallet: { label: 'Mobile wallet', description: 'Pay from your mobile wallet' },
   cash_on_delivery: { label: 'Cash on delivery', description: 'Pay the courier when it arrives' },
+  card: { label: 'Card (no longer offered)', description: 'Paid online before card payment was retired' },
+  wallet: { label: 'Wallet (no longer offered)', description: 'Paid online before card payment was retired' },
 };
 
 export const ROLE_META = {

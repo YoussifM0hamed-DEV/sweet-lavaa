@@ -6,8 +6,7 @@ import { quoteCart } from '../services/pricing.service.js';
 import { recordCouponUsage, releaseCouponUsage } from '../services/coupon.service.js';
 import { reserveStock, releaseStock } from '../services/inventory.service.js';
 import { generateOrderNumber } from '../utils/orderNumber.js';
-import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS } from '../config/constants.js';
-import { env } from '../config/env.js';
+import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS, OFFERED_PAYMENT_METHODS } from '../config/constants.js';
 
 /**
  * Creates an order from the signed-in customer's cart.
@@ -22,14 +21,13 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   const settings = await Setting.getSettings();
 
-  if (req.body.paymentMethod === PAYMENT_METHODS.COD && !settings.commerce.allowCashOnDelivery) {
-    throw ApiError.badRequest('Cash on delivery is not available at the moment.');
-  }
-
-  // Online payment is off until the provider is configured. The client hides
-  // the card option, but the order endpoint is what actually enforces it.
-  if (req.body.paymentMethod !== PAYMENT_METHODS.COD && !env.fawaterak.enabled) {
+  // The schema still accepts the old online methods so historical orders stay
+  // editable; new orders may only use what checkout actually offers.
+  if (!OFFERED_PAYMENT_METHODS.includes(req.body.paymentMethod)) {
     throw ApiError.badRequest('Online payment is unavailable. Please choose cash on delivery.');
+  }
+  if (!settings.commerce.allowCashOnDelivery) {
+    throw ApiError.badRequest('Cash on delivery is not available at the moment.');
   }
 
   // strict: true makes unavailable / out-of-stock items reject the order.
@@ -83,7 +81,7 @@ export const createOrder = asyncHandler(async (req, res) => {
       payment: {
         method: req.body.paymentMethod,
         status: PAYMENT_STATUS.PENDING,
-        provider: req.body.paymentMethod === PAYMENT_METHODS.COD ? 'cash' : 'fawaterak',
+        provider: 'cash',
       },
       status: ORDER_STATUS.PENDING,
       statusHistory: [{ status: ORDER_STATUS.PENDING, changedBy: req.user._id, note: 'Order placed.' }],
@@ -113,12 +111,10 @@ export const createOrder = asyncHandler(async (req, res) => {
     }
   }
 
-  // Cash orders are confirmed straight away; card orders wait for Fawaterak.
-  if (req.body.paymentMethod === PAYMENT_METHODS.COD) {
-    order.status = ORDER_STATUS.CONFIRMED;
-    order.pushStatus(ORDER_STATUS.CONFIRMED, req.user._id, 'Cash on delivery order confirmed.');
-    await order.save();
-  }
+  // Nothing to wait for: a cash order is confirmed the moment it is placed.
+  order.status = ORDER_STATUS.CONFIRMED;
+  order.pushStatus(ORDER_STATUS.CONFIRMED, req.user._id, 'Cash on delivery order confirmed.');
+  await order.save();
 
   cart.items = [];
   cart.couponCode = null;
@@ -127,7 +123,7 @@ export const createOrder = asyncHandler(async (req, res) => {
   return sendSuccess(res, {
     status: 201,
     message: 'Your order has been placed.',
-    data: { order, requiresPayment: req.body.paymentMethod !== PAYMENT_METHODS.COD },
+    data: { order },
   });
 });
 

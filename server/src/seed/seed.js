@@ -247,9 +247,9 @@ const seedOrders = async ({ customers, products, zones, categories }) => {
       coupon: discount > 0 ? { coupon: null, code: 'SWEET10', discountType: 'percentage', discountValue: 10 } : {},
       pricing: { subtotal, discount, deliveryFee, tax: 0, total, currency: 'EGP' },
       payment: {
-        method: index % 4 === 0 ? PAYMENT_METHODS.COD : PAYMENT_METHODS.CARD,
+        method: PAYMENT_METHODS.COD,
         status: status === ORDER_STATUS.CANCELLED ? PAYMENT_STATUS.FAILED : isPaid ? PAYMENT_STATUS.PAID : PAYMENT_STATUS.PENDING,
-        provider: index % 4 === 0 ? 'cash' : 'fawaterak',
+        provider: 'cash',
         transactionId: isPaid ? `TXN${randomInt(100000, 999999)}` : null,
         paidAt: isPaid ? createdAt : null,
       },

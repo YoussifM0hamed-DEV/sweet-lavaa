@@ -12,7 +12,6 @@
     "seed": "npm run seed --prefix server",
     "build": "npm install --prefix server && npm install --prefix client && npm run build --prefix client",
     "cloudinary:check": "npm run cloudinary:check --prefix server",
-    "fawaterak:check": "npm run fawaterak:check --prefix server",
     "google:check": "npm run google:check --prefix server",
     "start": "npm start --prefix server",
     "build:client": "npm run build --prefix client"

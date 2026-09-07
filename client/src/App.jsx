@@ -19,7 +19,6 @@ const Categories = lazy(() => import('./pages/Categories.jsx'));
 const CategoryProducts = lazy(() => import('./pages/CategoryProducts.jsx'));
 const Cart = lazy(() => import('./pages/Cart.jsx'));
 const Checkout = lazy(() => import('./pages/Checkout.jsx'));
-const Payment = lazy(() => import('./pages/Payment.jsx'));
 const OrderSuccess = lazy(() => import('./pages/OrderSuccess.jsx'));
 const OrderFailed = lazy(() => import('./pages/OrderFailed.jsx'));
 const Wishlist = lazy(() => import('./pages/Wishlist.jsx'));
@@ -88,14 +87,6 @@ const App = () => (
             element={
               <ProtectedRoute>
                 <Checkout />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="payment/:orderId"
-            element={
-              <ProtectedRoute>
-                <Payment />
               </ProtectedRoute>
             }
           />

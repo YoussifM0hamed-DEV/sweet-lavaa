@@ -30,11 +30,6 @@ export const orderService = {
   reviewable: () => apiClient.get('/orders/my/reviewable'),
 };
 
-export const paymentService = {
-  config: () => apiClient.get('/payments/config'),
-  initiate: (orderId) => apiClient.post(`/payments/fawaterak/initiate/${orderId}`),
-  status: (orderId) => apiClient.get(`/payments/status/${orderId}`),
-};
 
 export const couponService = {
   check: (code) => apiClient.post('/coupons/check', { code }),

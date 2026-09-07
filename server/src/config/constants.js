@@ -82,11 +82,19 @@ export const PAYMENT_STATUS = {
   REFUNDED: 'refunded',
 };
 
+/**
+ * Cash on delivery is the only method offered. `card` and `wallet` are kept so
+ * the orders taken before online payment was removed still load and can still
+ * be edited — dropping them would fail schema validation on every save.
+ */
 export const PAYMENT_METHODS = {
   CARD: 'card',
   WALLET: 'wallet',
   COD: 'cash_on_delivery',
 };
+
+/** What checkout may actually be asked for. */
+export const OFFERED_PAYMENT_METHODS = [PAYMENT_METHODS.COD];
 
 export const COUPON_TYPES = {
   PERCENTAGE: 'percentage',

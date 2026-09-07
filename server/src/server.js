@@ -8,7 +8,6 @@ const start = async () => {
 
   const server = app.listen(env.port, () => {
     logger.success(`Sweet Lava API listening on http://localhost:${env.port} (${env.nodeEnv})`);
-    if (!env.fawaterak.enabled) logger.warn('Fawaterak is not configured — online card payment is disabled.');
     if (!env.google.enabled) logger.warn('Google OAuth is not configured — Google sign-in is disabled.');
   });
 

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { objectId, optionalObjectId, email, phone } from './common.js';
-import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS } from '../config/constants.js';
+import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS, OFFERED_PAYMENT_METHODS } from '../config/constants.js';
 
 /**
  * Note what is intentionally absent: prices, discounts, delivery fees and
@@ -24,7 +24,7 @@ export const createOrderSchema = z.object({
   }),
   deliveryZone: objectId,
   couponCode: z.string().trim().max(30).optional().nullable(),
-  paymentMethod: z.enum(Object.values(PAYMENT_METHODS)).optional().default(PAYMENT_METHODS.COD),
+  paymentMethod: z.enum(OFFERED_PAYMENT_METHODS).optional().default(PAYMENT_METHODS.COD),
   customerNotes: z.string().trim().max(500).optional().default(''),
   saveAddress: z.boolean().optional().default(false),
 });
