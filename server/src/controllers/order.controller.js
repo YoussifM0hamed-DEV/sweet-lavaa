@@ -6,7 +6,6 @@ import { quoteCart } from '../services/pricing.service.js';
 import { recordCouponUsage, releaseCouponUsage } from '../services/coupon.service.js';
 import { reserveStock, releaseStock } from '../services/inventory.service.js';
 import { generateOrderNumber } from '../utils/orderNumber.js';
-import { sendOrderConfirmation, sendNewOrderAlert } from '../services/email.service.js';
 import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_METHODS, OFFERED_PAYMENT_METHODS } from '../config/constants.js';
 
 /**
@@ -120,11 +119,6 @@ export const createOrder = asyncHandler(async (req, res) => {
   cart.items = [];
   cart.couponCode = null;
   await cart.save();
-
-  // Not awaited: a slow or broken mail server must never fail a placed order.
-  // The service swallows its own errors, so nothing here can reject.
-  sendOrderConfirmation(order);
-  sendNewOrderAlert(order);
 
   return sendSuccess(res, {
     status: 201,

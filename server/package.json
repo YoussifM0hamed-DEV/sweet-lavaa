@@ -11,7 +11,6 @@
     "seed:destroy": "node src/seed/seed.js --destroy",
     "db:check": "node src/seed/checkConnection.js",
     "cloudinary:check": "node src/seed/checkCloudinary.js",
-    "email:check": "node src/seed/checkEmail.js",
     "google:check": "node src/seed/checkGoogle.js"
   },
   "dependencies": {
@@ -32,7 +31,6 @@
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "multer": "^2.3.0",
-    "nodemailer": "^10.0.1",
     "slugify": "^1.6.6",
     "validator": "^13.12.0",
     "zod": "^3.24.1"

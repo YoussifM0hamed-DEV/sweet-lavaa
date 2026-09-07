@@ -4,8 +4,6 @@ import ApiError from '../utils/ApiError.js';
 import { sendSuccess, sendCreated } from '../utils/apiResponse.js';
 import { signAccessToken, setAuthCookie, clearAuthCookie, createRandomToken, hashToken } from '../utils/token.js';
 import { verifyGoogleIdToken } from '../services/google.service.js';
-import { sendPasswordReset } from '../services/email.service.js';
-import { env } from '../config/env.js';
 import { ROLES } from '../config/constants.js';
 import logger from '../utils/logger.js';
 
@@ -150,12 +148,8 @@ export const forgotPassword = asyncHandler(async (req, res) => {
   user.passwordResetExpires = new Date(Date.now() + 30 * 60 * 1000);
   await user.save({ validateBeforeSave: false });
 
-  const resetUrl = `${env.clientUrl.replace(/\/$/, '')}/reset-password/${raw}`;
-
-  // Logged as well as sent: without SMTP configured this is the only way to
-  // finish a reset, and it saves a support round trip when mail goes missing.
-  logger.info(`Password reset link: ${resetUrl}`);
-  await sendPasswordReset(user, resetUrl);
+  // Wire an email provider here. In development the link is logged instead.
+  logger.info(`Password reset link: ${process.env.CLIENT_URL}/reset-password/${raw}`);
 
   return genericResponse();
 });
