@@ -52,6 +52,12 @@ Two rules:
 - **Never add `PORT`.** Railway injects it; hardcoding it makes the healthcheck fail.
 - Set `SERVER_URL` to the domain you just generated.
 
+> **Root Directory is not optional.** Left empty, Railway deploys the repo root, installs only
+> the root `package.json` (which has no dependencies), then runs its `start` script — which
+> delegates into `server/` where nothing is installed. The container crash-loops on
+> `Cannot find package 'express'` and the healthcheck reports `service unavailable`, because the
+> process dies before it ever listens.
+
 </details>
 
 <details>
