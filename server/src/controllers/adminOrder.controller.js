@@ -113,6 +113,35 @@ export const updatePaymentStatus = asyncHandler(async (req, res) => {
   return sendSuccess(res, { message: 'Payment status updated.', data: { order } });
 });
 
+/**
+ * Permanently removes one order. There is no undo, so it is restricted to a
+ * super admin and is deliberately per-order — there is no bulk wipe.
+ *
+ * Everything the order took is given back first: reserved stock, the customer's
+ * coupon use, and the lifetime totals that delivering it had added.
+ */
+export const adminDeleteOrder = asyncHandler(async (req, res) => {
+  const order = await Order.findById(req.params.id);
+  if (!order) throw ApiError.notFound('Order not found.');
+
+  if (order.inventoryApplied) {
+    await releaseStock(order.items);
+    order.inventoryApplied = false;
+  }
+  if (order.coupon?.coupon) await releaseCouponUsage(order.coupon.coupon, order.user);
+
+  // Delivering an order incremented these, so deleting it has to undo them.
+  if (order.status === ORDER_STATUS.DELIVERED) {
+    await User.findByIdAndUpdate(order.user, {
+      $inc: { 'stats.ordersCount': -1, 'stats.totalSpent': -order.pricing.total },
+    });
+  }
+
+  await Order.deleteOne({ _id: order._id });
+
+  return sendSuccess(res, { message: `Order ${order.orderNumber} deleted.`, data: { orderNumber: order.orderNumber } });
+});
+
 export const addOrderNote = asyncHandler(async (req, res) => {
   const order = await Order.findByIdAndUpdate(
     req.params.id,

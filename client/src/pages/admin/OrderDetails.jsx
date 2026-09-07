@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import {
-  FiArrowLeft, FiUser, FiMapPin, FiCreditCard, FiPackage, FiSave, FiPrinter, FiClock,
+  FiArrowLeft, FiUser, FiMapPin, FiCreditCard, FiPackage, FiSave, FiPrinter, FiClock, FiTrash2,
 } from 'react-icons/fi';
 import AdminPageHeader from '../../components/admin/AdminPageHeader.jsx';
 import Badge from '../../components/ui/Badge.jsx';
@@ -13,6 +13,7 @@ import ConfirmDialog from '../../components/ui/ConfirmDialog.jsx';
 import { Skeleton } from '../../components/ui/Skeleton.jsx';
 import { adminOrderService } from '../../services/adminService.js';
 import { useSettings } from '../../context/SettingsContext.jsx';
+import { useAuth } from '../../context/AuthContext.jsx';
 import { formatPrice, formatDateTime } from '../../utils/format.js';
 import { ORDER_STATUS_META, PAYMENT_STATUS_META, PAYMENT_METHOD_META } from '../../utils/constants.js';
 
@@ -45,6 +46,8 @@ const OrderDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currency } = useSettings();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'super_admin';
 
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,6 +57,7 @@ const OrderDetails = () => {
   const [adminNote, setAdminNote] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [confirmCancel, setConfirmCancel] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const load = () => {
     adminOrderService
@@ -114,6 +118,19 @@ const OrderDetails = () => {
       toast.error(error.message);
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const deleteOrder = async () => {
+    setIsSaving(true);
+    try {
+      const response = await adminOrderService.remove(id);
+      toast.success(response.message);
+      navigate('/admin/orders', { replace: true });
+    } catch (error) {
+      toast.error(error.message);
+      setIsSaving(false);
+      setConfirmDelete(false);
     }
   };
 
@@ -387,8 +404,38 @@ const OrderDetails = () => {
               Save note
             </Button>
           </section>
+          {isSuperAdmin && (
+            <section className="card border border-red-200 p-5">
+              <h2 className="font-display text-base text-cocoa-800">Delete this order</h2>
+              <p className="mt-1 text-xs leading-relaxed text-cocoa-400">
+                Removes it permanently. Stock and coupon usage are returned first. Use this to clear test
+                orders — for a real one a customer placed, cancel it instead so the record survives.
+              </p>
+              <Button
+                fullWidth
+                size="sm"
+                variant="outline"
+                className="mt-3 border-red-300 text-red-700 hover:bg-red-50"
+                onClick={() => setConfirmDelete(true)}
+              >
+                <FiTrash2 /> Delete order
+              </Button>
+            </section>
+          )}
         </aside>
       </div>
+
+
+      <ConfirmDialog
+        isOpen={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={deleteOrder}
+        isLoading={isSaving}
+        title={`Delete ${order.orderNumber}?`}
+        message="This removes the order for good — it will not appear in orders, analytics or the customer's history. Stock and coupon usage are returned. There is no undo."
+        confirmLabel="Delete permanently"
+        cancelLabel="Keep it"
+      />
 
       <ConfirmDialog
         isOpen={confirmCancel}

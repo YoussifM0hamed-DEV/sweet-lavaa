@@ -57,6 +57,7 @@ export const adminOrderService = {
   updateStatus: (id, payload) => apiClient.patch(`/orders/admin/${id}/status`, payload),
   updatePayment: (id, payload) => apiClient.patch(`/orders/admin/${id}/payment`, payload),
   addNote: (id, note) => apiClient.patch(`/orders/admin/${id}/note`, { note }),
+  remove: (id) => apiClient.delete(`/orders/admin/${id}`),
   forCustomer: (id) => apiClient.get(`/orders/admin/customer/${id}`),
 };
 
